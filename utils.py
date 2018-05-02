@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from ibm_botocore.client import Config
 import ibm_boto3
 import json
+from secrets import creds_hmac
 
 class hn_collector():
 
@@ -35,21 +36,7 @@ class hn_collector():
 
 
 
-def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv'):
-
-    creds_hmac={
-      "apikey": "__NBobRme7hbxc51XYbIXDxqp0RIfaTjLy0ttAcxF_GY",
-      "cos_hmac_keys": {
-        "access_key_id": "e13393fbc8dd4d9fb92b2a9684c1d4a7",
-        "secret_access_key": "ba6a5ba31fe616205f834ef9a8d832afc79c84e3246868c4"
-      },
-      "endpoints": "https://cos-service.bluemix.net/endpoints",
-      "iam_apikey_description": "Auto generated apikey during resource-key operation for Instance - crn:v1:bluemix:public:cloud-object-storage:global:a/f9248c5ce5b260551682838d09c2415e:66a35c59-e0e4-4474-beb1-a026696207e0::",
-      "iam_apikey_name": "auto-generated-apikey-e13393fb-c8dd-4d9f-b92b-2a9684c1d4a7",
-      "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Writer",
-      "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/f9248c5ce5b260551682838d09c2415e::serviceid:ServiceId-063bb032-c60f-4bfe-baa4-5a9f884e04b2",
-      "resource_instance_id": "crn:v1:bluemix:public:cloud-object-storage:global:a/f9248c5ce5b260551682838d09c2415e:66a35c59-e0e4-4474-beb1-a026696207e0::"
-    }
+def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv', creds_hmac = creds_hmac):
 
     import boto
     import boto.s3.connection
@@ -70,8 +57,8 @@ def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv'
     key = b.get_key(file_key)
     key.get_contents_to_filename(out_path)
 
-def prep_card_data(source_json = 'data/scored_stories.json'):
-    with open('data/scored_stories.json') as json_data:
+def prep_card_data(source_json = 'data/scored_nmf.json'):
+    with open(source_json) as json_data:
         d = json.load(json_data)
     story_list= d[:500]
     for story in story_list:

@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, jsonify
 import atexit
 import os
 import json
+from secrets import creds_hmac
+
 
 app = Flask(__name__, static_url_path='')
 
@@ -19,9 +21,9 @@ from utils import hn_collector, refresh_COS_data, prep_card_data
 import requests
 
 
-refresh_COS_data('scored_nmf.json','data/scored_nmf.json')
-refresh_COS_data('scored_nmf_kl.json','data/scored_nmf_kl.json')
-refresh_COS_data('scored_lda.json','data/scored_lda.json')
+refresh_COS_data('scored_nmf.json','data/scored_nmf.json',creds_hmac)
+refresh_COS_data('scored_nmf_kl.json','data/scored_nmf_kl.json',creds_hmac)
+refresh_COS_data('scored_lda.json','data/scored_lda.json',creds_hmac)
 
 story_list = prep_card_data()
 

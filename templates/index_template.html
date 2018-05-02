@@ -62,7 +62,7 @@
         {% endif %}
               <div class="col-3"> -->
                 <div class="{{ story.card_class }}">
-                    <a href={{ 'story/' }}{{ story['id'] }} target="_blank">
+                    <a href="{{ url_for('story', story_id= story.id)}}" target="_blank">
                         <span><h5>{{ story.title }}</h5></span>
                         <hr>
                         by: {{ story.by }}
