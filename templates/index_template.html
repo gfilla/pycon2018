@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hacker News ML Viewer </title>
+
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static',filename='styles.css') }}" rel="stylesheet">
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+<!-- Jquery filtering plugin: https://isotope.metafizzy.co/filtering.html -->
+
+  {% block content %}
+  <div class="container-fluid">
+<div class="row-fluid" >
+<h3>Hacker News ML Viewer</h3>
+</div>
+<div>
+  Change model: <a href="{{ url_for('modeled_cards', model_id = 'nmf' )}}">NMF</a> <a href="{{ url_for('modeled_cards', model_id = 'nmf_kl' )}}">NMF KL</a> <a href="{{ url_for('modeled_cards', model_id = 'lda' )}}">LDA</a>
+</div>
+<div class="button-group filters-button-group">
+  <button class="button is-checked" data-filter="*">show all</button>
+  <button class="button" data-filter=".Topic_1">Health and Society</button>
+    <button class="button" data-filter=".Topic_2">Business</button>
+      <button class="button" data-filter=".Topic_3">Topic_3</button>
+        <button class="button" data-filter=".Topic_4">Topic_4</button>
+          <button class="button" data-filter=".Topic_5">Topic_5</button>
+            <button class="button" data-filter=".Topic_6">Topic_6</button>
+              <button class="button" data-filter=".Topic_7">Topic_7</button>
+                <button class="button" data-filter=".Topic_8">Topic_8</button>
+                  <button class="button" data-filter=".Topic_9">Topic_9</button>
+                    <button class="button" data-filter=".Topic_10">Topic_10</button>
+                      <button class="button" data-filter=".Topic_11">Topic_11</button>
+                        <button class="button" data-filter=".Topic_12">Topic_12</button>
+                          <button class="button" data-filter=".Topic_13">Topic_13</button>
+                            <button class="button" data-filter=".Topic_14">Topic_14</button>
+                              <button class="button" data-filter=".Topic_15">Topic_15</button>
+
+
+</div>
+
+<div class='grid'>
+          {% for story in stories %}
+  <!--  <div class="row-fluid" >
+
+        {% if loop.index0 % 3 == 0 %}
+          <div class="row">
+        {% endif %}
+              <div class="col-3"> -->
+                <div class="{{ story.card_class }}">
+                    <a href={{ 'story/' }}{{ story['id'] }} target="_blank">
+                        <span><h5>{{ story.title }}</h5></span>
+                        <hr>
+                        by: {{ story.by }}
+                        <span> {{ story.ml_topics }}</span>
+                    </a>
+                </div>
+
+
+    <!--
+        {% if loop.index0 % 3 == 2 or loop.last %}
+        </div>
+        {% endif %}-->
+        {% endfor %}
+  <!--     </div>
+  </div>-->
+  </div>
+  {% endblock %}
+
+</div> <!-- end grid -->
+
+<script>
+
+// external js: isotope.pkgd.js
+
+// init Isotope
+var $grid = $('.grid').isotope({
+  itemSelector: '.element-item',
+  layoutMode: 'fitRows',
+  masonry: {
+   gutter: 40,
+   columnWidth: 320
+ }
+});
+// filter functions
+var filterFns = {
+  // show if number is greater than 50
+  numberGreaterThan50: function() {
+    var number = $(this).find('.number').text();
+    return parseInt( number, 10 ) > 50;
+  },
+  // show if name ends with -ium
+  ium: function() {
+    var name = $(this).find('.name').text();
+    return name.match( /ium$/ );
+  }
+};
+// bind filter button click
+$('.filters-button-group').on( 'click', 'button', function() {
+  var filterValue = $( this ).attr('data-filter');
+  // use filterFn if matches value
+  filterValue = filterFns[ filterValue ] || filterValue;
+  $grid.isotope({ filter: filterValue });
+});
+// change is-checked class on buttons
+$('.button-group').each( function( i, buttonGroup ) {
+  var $buttonGroup = $( buttonGroup );
+  $buttonGroup.on( 'click', 'button', function() {
+    $buttonGroup.find('.is-checked').removeClass('is-checked');
+    $( this ).addClass('is-checked');
+  });
+});
+
+</script>
+
+
+    <footer class="footer">
+        <div class="container">
+            <span><a href="https://github.com/gfilla/pycon2018" target="_blank">Github repo for application</a></span>
+        </div>
+    </footer>
+
+</body>
+
+
+
+</html>
