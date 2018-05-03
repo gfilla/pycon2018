@@ -57,12 +57,12 @@ def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv'
     key = b.get_key(file_key)
     key.get_contents_to_filename(out_path)
 
-def prep_card_data(source_json = 'data/scored_nmf.json'):
+def prep_card_data(source_json = 'data/scored_nmf.json',threshold=0.05):
     with open(source_json) as json_data:
         d = json.load(json_data)
     story_list= d[:500]
     for story in story_list:
-        filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > 0.05} #filter topics for scores in topics
+        filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
         story['ml_topics'] = filtered_dict
         story['card_class'] = 'element-item ' + ' '.join(list(filtered_dict.keys()))
         try:

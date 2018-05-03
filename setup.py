@@ -1,6 +1,3 @@
-"""
-Hello World app for running Python apps on Bluemix
-"""
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
@@ -15,10 +12,10 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='python-hello-world-flask',
+    name='pyConFlask0518',
     version='1.0.0',
-    description='Hello World app for running Python apps on Bluemix',
+    description='HN Flask App',
     long_description=long_description,
-    url='https://github.com/IBM-Bluemix/python-hello-world-flask',
+    url='https://pyconflask0518.mybluemix.net/',
     license='Apache-2.0'
 )

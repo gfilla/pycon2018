@@ -34,7 +34,7 @@ def root():
 
 @app.route('/model/<model_id>')
 def modeled_cards(model_id="nmf"):
-    return render_template('index_template.html', stories=prep_card_data('data/scored_{}.json'.format(model_id)))
+    return render_template('index_template.html', stories=prep_card_data('data/scored_{}.json'.format(model_id),threshold= 0.05))
 
 @app.route('/story/<story_id>')
 def story(story_id=None):

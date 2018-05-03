@@ -1,11 +1,17 @@
 html {
   position: relative;
   min-height: 100%;
-}
-body {
-  margin-bottom: 60px;
 
 }
+
+body {
+  margin-bottom: 60px;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -15,11 +21,6 @@ body {
   text-align: center;
   background-color: #f5f7fa;
 }
-.helloInput {
-  width: 300px;
-}
-
-
 
 .element-item {
   transition: box-shadow .3s;
@@ -49,8 +50,30 @@ body {
   height: 1000px;
 }
 
-.story-page-title{
+/* .story-page-title{
 margin:2em;
 padding-left: 1.5em;
 
+} */
+
+.header {
+	width: 100%;
+	height: 90px;
+	padding: 20px;
+	background-color: #eee;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1;
+}
+
+.main {
+	min-height: 1500px;
+	padding: 150px 40px 40px;
+	flex: 1;
+}
+
+* {
+	box-sizing: border-box;
 }
