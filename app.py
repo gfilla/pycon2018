@@ -1,40 +1,45 @@
-from cloudant import Cloudant
 from flask import Flask, render_template, request, jsonify
-import atexit
+
 import os
 import json
-from secrets import creds_hmac
+import requests
+import time
+from sklearn.externals import joblib
 
+from secrets import creds_hmac,wml_credentials
+from utils import *
 
 app = Flask(__name__, static_url_path='')
 
-db_name = 'mydb'
-client = None
-db = None
 
 # On IBM Cloud Cloud Foundry, get the port number from the environment variable PORT
 # When running this app on the local machine, default the port to 8000
 port = int(os.getenv('PORT', 8000))
 
-from flask import render_template
-from utils import hn_collector, refresh_COS_data, prep_card_data
-import requests
 
+CURRENT_NEW = 'current_new.json'
+CURRENT_TOP = 'current_top.json'
 
-refresh_COS_data('scored_nmf.json','data/scored_nmf.json',creds_hmac)
-refresh_COS_data('scored_nmf_kl.json','data/scored_nmf_kl.json',creds_hmac)
-refresh_COS_data('scored_lda.json','data/scored_lda.json',creds_hmac)
+#refresh_COS_data(CURRENT_NEW,'data/current_new.json',creds_hmac)
+refresh_COS_data(CURRENT_TOP,'data/current_top.json',creds_hmac)
+lda_model = load_wml_model(wml_credentials)
+df = score_stories('data/current_top.json','data/scored_top.json',lda_model)
 
-story_list = prep_card_data()
+story_list = prep_card_data( source_json = 'data/scored_top.json',threshold=0.05, mode= 'cluster')
 
 
 @app.route('/')
 def root():
     return render_template('index_template.html', stories=story_list)
 
+@app.route('/top') # still need to add
+def top():
+    return render_template('index_template.html', stories=new_stories)
+
+
 @app.route('/model/<model_id>')
 def modeled_cards(model_id="nmf"):
-    return render_template('index_template.html', stories=prep_card_data('data/scored_{}.json'.format(model_id),threshold= 0.05))
+    return render_template('model_template.html', stories=prep_card_data('data/scored_{}.json'.format(model_id),threshold= 0.05))
 
 @app.route('/story/<story_id>')
 def story(story_id=None):
@@ -68,6 +73,19 @@ def story(story_id=None):
 #     except:
 #         pass
 #
+# refresh_COS_data('scored_nmf_kl.json','data/scored_nmf_kl.json',creds_hmac)
+# refresh_COS_data('scored_lda.json','data/scored_lda.json',creds_hmac)
+# refresh_COS_data('clustered_stories.json','data/clustered_stories.json',creds_hmac)
+
+# hn = hn_collector()
+# top_stories = hn.get_top_stories()
+# new_stories = hn.get_new_stories()
+# story_list = update_stories()
+
+
+# @app.route('/')
+# def root():
+#     return render_template('index_template.html', stories=story_list)
 
 
 

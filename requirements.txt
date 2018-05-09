@@ -2,3 +2,5 @@ Flask==0.12.2
 cloudant==2.4.0
 ibm-cos-sdk==2.0.1
 requests==2.18.4
+watson_machine_learning_client==1.0.109
+apscheduler==3.5.1

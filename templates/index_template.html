@@ -26,58 +26,43 @@
 
   {% block content %}
   <div class="container-fluid">
-<div class="row-fluid" >
-<h3>Hacker News ML Viewer</h3>
-</div>
+    <div class="row-fluid" >
+    <h3><a href={{ url_for('root') }}>Hacker News ML Viewer</a></h3>
+    </div>
+<!-- <div>  // Still to implement
+  <a href={{ url_for('top') }}>New Stories</a>
+</div> -->
 <div>
-  Change model: <a href="{{ url_for('modeled_cards', model_id = 'nmf' )}}">NMF</a> <a href="{{ url_for('modeled_cards', model_id = 'nmf_kl' )}}">NMF KL</a> <a href="{{ url_for('modeled_cards', model_id = 'lda' )}}">LDA</a>
+  Other topic models: <a href="{{ url_for('modeled_cards', model_id = 'nmf' )}}">NMF</a> <a href="{{ url_for('modeled_cards', model_id = 'nmf_kl' )}}">NMF KL</a> <a href="{{ url_for('modeled_cards', model_id = 'lda' )}}">LDA</a>
 </div>
 <div class="button-group filters-button-group">
   <button class="button is-checked" data-filter="*">show all</button>
-  <button class="button" data-filter=".Topic_1">Health and Society</button>
-    <button class="button" data-filter=".Topic_2">Business</button>
-      <button class="button" data-filter=".Topic_3">Topic_3</button>
-        <button class="button" data-filter=".Topic_4">Topic_4</button>
-          <button class="button" data-filter=".Topic_5">Topic_5</button>
-            <button class="button" data-filter=".Topic_6">Topic_6</button>
-              <button class="button" data-filter=".Topic_7">Topic_7</button>
-                <button class="button" data-filter=".Topic_8">Topic_8</button>
-                  <button class="button" data-filter=".Topic_9">Topic_9</button>
-                    <button class="button" data-filter=".Topic_10">Topic_10</button>
-                      <button class="button" data-filter=".Topic_11">Topic_11</button>
-                        <button class="button" data-filter=".Topic_12">Topic_12</button>
-                          <button class="button" data-filter=".Topic_13">Topic_13</button>
-                            <button class="button" data-filter=".Topic_14">Topic_14</button>
-                              <button class="button" data-filter=".Topic_15">Topic_15</button>
-
-
+  <button class="button" data-filter=".cluster-0">Release Radar</button>
+    <button class="button" data-filter=".cluster-1">Machine Learning</button>
+      <button class="button" data-filter=".cluster-2">Interesting</button>
+       <button class="button" data-filter=".cluster-3">Business Deals</button>
+          <button class="button" data-filter=".cluster-4">Developer</button>
+            <button class="button" data-filter=".cluster-5">Gov. and Regulation</button>
+              <button class="button" data-filter=".cluster-6">Show and Tell</button>
+                <button class="button" data-filter=".cluster-7">Business</button>
+                <button class="button" data-filter=".cluster-8">Show and Tell</button>
+                  <button class="button" data-filter=".cluster-9">Business</button>
 </div>
 
 <div class='grid'>
           {% for story in stories %}
-  <!--  <div class="row-fluid" >
 
-        {% if loop.index0 % 3 == 0 %}
-          <div class="row">
-        {% endif %}
-              <div class="col-3"> -->
                 <div class="{{ story.card_class }}">
                     <a href="{{ url_for('story', story_id= story.id)}}" target="_blank">
                         <span><h5>{{ story.title }}</h5></span>
                         <hr>
                         by: {{ story.by }}
-                        <span> {{ story.ml_topics }}</span>
+                        <span><br>Topic: {{ story.label_name }}</span>
                     </a>
                 </div>
 
-
-    <!--
-        {% if loop.index0 % 3 == 2 or loop.last %}
-        </div>
-        {% endif %}-->
         {% endfor %}
-  <!--     </div>
-  </div>-->
+
   </div>
   {% endblock %}
 
@@ -96,10 +81,18 @@ var $grid = $('.grid').isotope({
    columnWidth: 320
  }
 });
-// filter functions
+
+// bind filter button click
+$('.filters-button-group').on( 'click', 'button', function() {
+  var filterValue = $( this ).attr('data-filter');
+  // use filterFn if matches value
+  filterValue = filterFns[ filterValue ] || filterValue;
+  $grid.isotope({ filter: filterValue });
+});
 var filterFns = {
   // show if number is greater than 50
   numberGreaterThan50: function() {
+    // use $(this) to get item element
     var number = $(this).find('.number').text();
     return parseInt( number, 10 ) > 50;
   },
@@ -109,13 +102,6 @@ var filterFns = {
     return name.match( /ium$/ );
   }
 };
-// bind filter button click
-$('.filters-button-group').on( 'click', 'button', function() {
-  var filterValue = $( this ).attr('data-filter');
-  // use filterFn if matches value
-  filterValue = filterFns[ filterValue ] || filterValue;
-  $grid.isotope({ filter: filterValue });
-});
 // change is-checked class on buttons
 $('.button-group').each( function( i, buttonGroup ) {
   var $buttonGroup = $( buttonGroup );

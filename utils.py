@@ -2,8 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 from ibm_botocore.client import Config
 import ibm_boto3
+from sklearn.externals import joblib
 import json
-from secrets import creds_hmac
+import pandas as pd
+from secrets import creds_hmac, wml_credentials
+from watson_machine_learning_client import WatsonMachineLearningAPIClient
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
 class hn_collector():
 
@@ -15,11 +20,12 @@ class hn_collector():
         self.ITEM ='item/'
         self.HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'}
 
-    def get_top_stories(self):
+    def get_top_stories(self, return_all = False):
         return(eval(requests.get(self.API_BASE + self.TOP).content))
 
-    def get_new_stories(self):
+    def get_new_stories(self,return_all=False):
         return(eval(requests.get(self.API_BASE + self.NEW).content))
+
 
     def get_story(self, story_id):
         return(eval(requests.get(self.API_BASE + self.ITEM + str(story_id)+".json").content))
@@ -34,6 +40,21 @@ class hn_collector():
         except:
             return('{} FAILED'.format(story_url))
 
+    def get_list_content(self, story_list,title='data/stories.json'):
+        all_stories = []
+        for story in story_list:
+
+            try:
+                s = self.get_story(story)
+                s['text'] =  self.get_text(s['url'])
+            except:
+                print(story)
+                pass
+            all_stories.append(s)
+        with open(title, 'w') as outfile:
+            json.dump(all_stories, outfile)
+        print("All stories saved to {}".format(title))
+        return(all_stories)
 
 
 def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv', creds_hmac = creds_hmac):
@@ -57,16 +78,44 @@ def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv'
     key = b.get_key(file_key)
     key.get_contents_to_filename(out_path)
 
-def prep_card_data(source_json = 'data/scored_nmf.json',threshold=0.05):
+def prep_card_data(source_json = 'data/scored_nmf.json',threshold=0.05, mode = 'topic'):
     with open(source_json) as json_data:
         d = json.load(json_data)
-    story_list= d[:500]
-    for story in story_list:
-        filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
-        story['ml_topics'] = filtered_dict
-        story['card_class'] = 'element-item ' + ' '.join(list(filtered_dict.keys()))
-        try:
-            story['id'] = str(story['id'])[:-2]
-        except:
-            pass
+    story_list= d[:100]
+    if mode == 'topic':
+        for story in story_list:
+            filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
+            story['ml_topics'] = filtered_dict
+            story['card_class'] = 'element-item ' + ' '.join(list(filtered_dict.keys()))
+            try:
+                story['id'] = str(story['id'])[:-2]
+                #print(model.transform([story['text']]))
+            except:
+                pass
+    elif mode == 'cluster':
+        for story in story_list:
+            filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
+            story['ml_topics'] = story['label']
+            story['card_class'] = 'element-item cluster-{}'.format(story['label'])
+            try:
+                story['id'] = str(story['id'])#[:-2]
+                #print(model.transform([story['text']]))
+            except:
+                pass
     return(story_list)
+
+def score_stories(in_path,out_path, model):
+    with open('data/current_top.json') as json_data:
+        story_list = json.load(json_data)
+    df = pd.DataFrame(story_list)
+    clf = joblib.load('models/svm.pkl')
+    df['label'] = clf.predict(df.text)
+    encoder = LabelEncoder()
+    encoder.classes_ = np.load('models/topic_classes.npy')
+    df['label_name'] = encoder.inverse_transform(df['label'])
+    df.to_json(out_path,orient='records')
+    return(df)
+
+def load_wml_model(wml_credentials):
+    client = WatsonMachineLearningAPIClient(wml_credentials)
+    return(client.repository.load(wml_credentials['guid'] ))
