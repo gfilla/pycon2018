@@ -5,10 +5,26 @@ import ibm_boto3
 from sklearn.externals import joblib
 import json
 import pandas as pd
-from secrets import creds_hmac, wml_credentials
+try:
+    from secrets import creds_hmac, wml_credentials
+except:
+    mode = 'offline'
 from watson_machine_learning_client import WatsonMachineLearningAPIClient
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+
+topic_list = {'biz-news': {'css_class': '.biz-news', 'display_name': 'Biz-News'},
+    'business': {'css_class': '.business', 'display_name': 'Business'},
+    'crypto': {'css_class': '.crypto', 'display_name': 'Crypto'},
+    'dev': {'css_class': '.dev', 'display_name': 'Dev'},
+    'github': {'css_class': '.github', 'display_name': 'Github'},
+    'ml': {'css_class': '.ml', 'display_name': 'Ml'},
+    'news': {'css_class': '.news', 'display_name': 'News'},
+    'random': {'css_class': '.random', 'display_name': 'Random'},
+    'science': {'css_class': '.science', 'display_name': 'Science'},
+    'tech': {'css_class': '.tech', 'display_name': 'Tech'},
+    'thought': {'css_class': '.thought', 'display_name': 'Thought'}}
+
 
 class hn_collector():
 
