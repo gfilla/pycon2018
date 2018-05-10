@@ -80,8 +80,7 @@ def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv'
 
 def prep_card_data(source_json = 'data/scored_nmf.json',threshold=0.05, mode = 'topic'):
     with open(source_json) as json_data:
-        d = json.load(json_data)
-    story_list= d[:100]
+        story_list = json.load(json_data)
     if mode == 'topic':
         for story in story_list:
             filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
@@ -94,21 +93,19 @@ def prep_card_data(source_json = 'data/scored_nmf.json',threshold=0.05, mode = '
                 pass
     elif mode == 'cluster':
         for story in story_list:
-            filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
-            story['ml_topics'] = story['label']
             story['card_class'] = 'element-item cluster-{}'.format(story['label'])
             try:
-                story['id'] = str(story['id'])#[:-2]
-                #print(model.transform([story['text']]))
+                story['id'] = str(story['id'])
+                
             except:
                 pass
     return(story_list)
 
-def score_stories(in_path,out_path, model):
-    with open('data/current_top.json') as json_data:
+def score_stories(in_path,out_path,model_path):
+    with open(in_path) as json_data:
         story_list = json.load(json_data)
     df = pd.DataFrame(story_list)
-    clf = joblib.load('models/svm.pkl')
+    clf = joblib.load(model_path)
     df['label'] = clf.predict(df.text)
     encoder = LabelEncoder()
     encoder.classes_ = np.load('models/topic_classes.npy')

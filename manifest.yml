@@ -2,4 +2,4 @@
 applications:
  - name: pyConFlask0518
    random-route: true
-   memory: 128M
+   memory: 256M

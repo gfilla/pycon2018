@@ -1,14 +1,16 @@
-from flask import Flask, render_template, request, jsonify
+##  Importing all the dependencies
 
+from flask import Flask, render_template, request, jsonify
 import os
 import json
 import requests
 import time
 from sklearn.externals import joblib
-
-from secrets import creds_hmac,wml_credentials
+from secrets import creds_hmac,wml_credentials  # my secret credentials for object storage and watson machine learning
 from utils import *
 
+
+## instantiate Flask app object
 app = Flask(__name__, static_url_path='')
 
 
@@ -16,25 +18,36 @@ app = Flask(__name__, static_url_path='')
 # When running this app on the local machine, default the port to 8000
 port = int(os.getenv('PORT', 8000))
 
-
+# names of json sources for story data that will be updated when app is started, and model path
+DATA_DIR = 'data/'
 CURRENT_NEW = 'current_new.json'
 CURRENT_TOP = 'current_top.json'
+SCORED_NEW = 'scored_new.json'
+SCORED_TOP = 'scored_top.json'
+MODEL_PATH = 'models/svm.pkl'
 
+# currently only pulling Top stories for classification but this can easily be expanded using same method as Top stories
 #refresh_COS_data(CURRENT_NEW,'data/current_new.json',creds_hmac)
 refresh_COS_data(CURRENT_TOP,'data/current_top.json',creds_hmac)
-lda_model = load_wml_model(wml_credentials)
-df = score_stories('data/current_top.json','data/scored_top.json',lda_model)
 
-story_list = prep_card_data( source_json = 'data/scored_top.json',threshold=0.05, mode= 'cluster')
+# score_stories() takes in new "top stories" from HN, scores the stories with the model and saves a new version of json. returns a scored data df but is not used currently
+top_df = score_stories(in_path= DATA_DIR+ CURRENT_TOP, out_path = DATA_DIR+ SCORED_TOP,model_path = MODEL_PATH)
+new_df = score_stories(in_path= DATA_DIR+ CURRENT_NEW, out_path = DATA_DIR+ SCORED_NEW,model_path =  MODEL_PATH)
 
+# prep_card_data() takes the newly scored data and prepares it to pass to our template in the code below.  returns list of json story objects
+top_list = prep_card_data( source_json = DATA_DIR+ SCORED_TOP, threshold=0.05, mode = 'cluster')
+new_list = prep_card_data( source_json = DATA_DIR+ SCORED_NEW ,threshold=0.05, mode = 'cluster')
 
+#lda_model = load_wml_model(wml_credentials)  # if using model from Watson Machine Learning
+
+# main landing page of flask app - we pass story_list to the template found in templates/index_template.html
 @app.route('/')
 def root():
-    return render_template('index_template.html', stories=story_list)
+    return render_template('index_template.html', stories=top_list)
 
-@app.route('/top') # still need to add
+@app.route('/new') # still need to add
 def top():
-    return render_template('index_template.html', stories=new_stories)
+    return render_template('index_template.html', stories=story_list)
 
 
 @app.route('/model/<model_id>')
@@ -48,67 +61,10 @@ def story(story_id=None):
     story = hn.get_story(story_id)
 
     if story.get('url') is None:
-        return render_template('post.html', story_id=hn.get_story(story_id))
+        return render_template('post.html', story_id=story)
     else:
-        return render_template('story.html', story_id=hn.get_story(story_id))
+        return render_template('story.html', story_id=story)
 
-# /* Endpoint to greet and add a new visitor to database.
-# * Send a POST request to localhost:8000/api/visitors with body
-# * {
-# *     "name": "Bob"
-# * }
-# */
-
-
-# hn = hn_collector()
-# stories = hn.get_new_stories()
-# story_list = []
-# id_to_url = {}
-# for story in stories[:50]:
-#     try:
-#         s = hn.get_story(story)
-#         s['kids'] = str(s.get('kids',None))
-#         story_list.append(s)
-#         #id_to_url[str(s['id'])] = s['url']
-#     except:
-#         pass
-#
-# refresh_COS_data('scored_nmf_kl.json','data/scored_nmf_kl.json',creds_hmac)
-# refresh_COS_data('scored_lda.json','data/scored_lda.json',creds_hmac)
-# refresh_COS_data('clustered_stories.json','data/clustered_stories.json',creds_hmac)
-
-# hn = hn_collector()
-# top_stories = hn.get_top_stories()
-# new_stories = hn.get_new_stories()
-# story_list = update_stories()
-
-
-# @app.route('/')
-# def root():
-#     return render_template('index_template.html', stories=story_list)
-
-
-
-    #if 'VCAP_SERVICES' in os.environ:
-    #     vcap = json.loads(os.getenv('VCAP_SERVICES'))
-    #     print('Found VCAP_SERVICES')
-    #     if 'cloudantNoSQLDB' in vcap:
-    #         creds = vcap['cloudantNoSQLDB'][0]['credentials']
-    #         user = creds['username']
-    #         password = creds['password']
-    #         url = 'https://' + creds['host']
-    #         client = Cloudant(user, password, url=url, connect=True)
-    #         db = client.create_database(db_name, throw_on_exists=False)
-    # elif os.path.isfile('vcap-local.json'):
-    #     with open('vcap-local.json') as f:
-    #         vcap = json.load(f)
-    #         print('Found local VCAP_SERVICES')
-    #         creds = vcap['services']['cloudantNoSQLDB'][0]['credentials']
-    #         user = creds['username']
-    #         password = creds['password']
-    #         url = 'https://' + creds['host']
-    #         client = Cloudant(user, password, url=url, connect=True)
-    #         db = client.create_database(db_name, throw_on_exists=False)
 
 
 if __name__ == '__main__':
