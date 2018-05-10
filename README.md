@@ -60,7 +60,7 @@ python app.py
 4. Flask application Development
 5. Model deployment and management
 
-# See these slides for more details
+##### See [these slides](https://github.com/gfilla/pycon2018/blob/master/Workshop%20Slides.pptx) for more details
 
 
 
