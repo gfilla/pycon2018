@@ -76,7 +76,7 @@ The manifest.yml includes basic information about your app, such as the name, ho
    memory: 128M
  ```
 
-## 4. Deploy the app
+## 5. Deploy the app
 
 You can use the Cloud Foundry CLI to deploy apps.
 
