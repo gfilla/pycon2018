@@ -73,7 +73,7 @@ class hn_collector():
         return(all_stories)
 
 
-def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv', creds_hmac = creds_hmac):
+def refresh_COS_data(file_key , out_path, creds_hmac ):
 
     import boto
     import boto.s3.connection
