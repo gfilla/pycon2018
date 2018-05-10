@@ -1,5 +1,6 @@
-# Hacker News ML Viewer
-## End to end example of building an ML powered application
+# End to End Machine Learning with Python in IBM Watson Studio:
+
+## Hacker News ML Viewer: Building an ML powered application
 
 
 ## Prerequisites
