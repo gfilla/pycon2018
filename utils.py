@@ -78,40 +78,48 @@ def refresh_COS_data(file_key ='hn_stories.csv', out_path='data/new_stories.csv'
     key = b.get_key(file_key)
     key.get_contents_to_filename(out_path)
 
-def prep_card_data(source_json = 'data/scored_nmf.json',threshold=0.05, mode = 'topic'):
+def prep_card_data(source_json = 'data/scored_nmf.json', threshold=0.05, mode = 'topic'):
     with open(source_json) as json_data:
         story_list = json.load(json_data)
     if mode == 'topic':
         for story in story_list:
-            filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
-            story['ml_topics'] = filtered_dict
-            story['card_class'] = 'element-item ' + ' '.join(list(filtered_dict.keys()))
             try:
+                filtered_dict = {k:v for k,v in story.items() if "Topic" in k and v > threshold} #filter topics for scores in topics
+                story['ml_topics'] = filtered_dict
+                story['card_class'] = 'element-item ' + ' '.join(list(filtered_dict.keys()))
                 story['id'] = str(story['id'])[:-2]
                 #print(model.transform([story['text']]))
             except:
                 pass
+        return(story_list[:200])
     elif mode == 'cluster':
         for story in story_list:
-            story['card_class'] = 'element-item cluster-{}'.format(story['label'])
+            story['card_class'] = 'element-item {}'.format(story['label_name'])
             try:
                 story['id'] = str(story['id'])
-                
+
             except:
                 pass
-    return(story_list)
+        return(story_list)
 
 def score_stories(in_path,out_path,model_path):
     with open(in_path) as json_data:
         story_list = json.load(json_data)
     df = pd.DataFrame(story_list)
+    df = df[~df.text.isnull()]
     clf = joblib.load(model_path)
     df['label'] = clf.predict(df.text)
     encoder = LabelEncoder()
     encoder.classes_ = np.load('models/topic_classes.npy')
     df['label_name'] = encoder.inverse_transform(df['label'])
+    topic_dict = {}
+    for topic in encoder.classes_ :
+        topic_dict[topic] =  {'css_class': ".{}".format(topic),
+                            'display_name': topic.title(),
+                            #'count': df.label_name.value_counts().get(topic,0)  # not accurate
+                           }
     df.to_json(out_path,orient='records')
-    return(df)
+    return(df,topic_dict)
 
 def load_wml_model(wml_credentials):
     client = WatsonMachineLearningAPIClient(wml_credentials)

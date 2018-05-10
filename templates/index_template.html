@@ -29,16 +29,23 @@
     <div class="row-fluid" >
     <h3><a href={{ url_for('root') }}>Hacker News ML Viewer</a></h3>
     </div>
-<!-- <div>  // Still to implement
-  <a href={{ url_for('top') }}>New Stories</a>
-</div> -->
+
+<div>
+   <a href="{{ url_for('top')}}">Top Stories</a>
+</div>
 <div>
   Other topic models: <a href="{{ url_for('modeled_cards', model_id = 'nmf' )}}">NMF</a> <a href="{{ url_for('modeled_cards', model_id = 'nmf_kl' )}}">NMF KL</a> <a href="{{ url_for('modeled_cards', model_id = 'lda' )}}">LDA</a>
 </div>
 <div class="button-group filters-button-group">
-  <button class="button is-checked" data-filter="*">show all</button>
-  <button class="button" data-filter=".cluster-0">Release Radar</button>
-    <button class="button" data-filter=".cluster-1">Machine Learning</button>
+<button class="button is-checked" data-filter="*">show all</button>
+
+{% for key, value in topics.items() %}
+    <button class="button" data-filter={{ value.css_class }}>{{ value.display_name }}  </button>
+{% endfor %}
+
+
+
+    <!-- <button class="button" data-filter=".cluster-1">Machine Learning</button>
       <button class="button" data-filter=".cluster-2">Interesting</button>
        <button class="button" data-filter=".cluster-3">Business Deals</button>
           <button class="button" data-filter=".cluster-4">Developer</button>
@@ -46,7 +53,7 @@
               <button class="button" data-filter=".cluster-6">Show and Tell</button>
                 <button class="button" data-filter=".cluster-7">Business</button>
                 <button class="button" data-filter=".cluster-8">Show and Tell</button>
-                  <button class="button" data-filter=".cluster-9">Business</button>
+                  <button class="button" data-filter=".cluster-9">Business</button> -->
 </div>
 
 <div class='grid'>

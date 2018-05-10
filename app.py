@@ -8,7 +8,7 @@ import time
 from sklearn.externals import joblib
 from secrets import creds_hmac,wml_credentials  # my secret credentials for object storage and watson machine learning
 from utils import *
-
+import numpy as np
 
 ## instantiate Flask app object
 app = Flask(__name__, static_url_path='')
@@ -28,11 +28,12 @@ MODEL_PATH = 'models/svm.pkl'
 
 # currently only pulling Top stories for classification but this can easily be expanded using same method as Top stories
 #refresh_COS_data(CURRENT_NEW,'data/current_new.json',creds_hmac)
-refresh_COS_data(CURRENT_TOP,'data/current_top.json',creds_hmac)
+refresh_COS_data(CURRENT_TOP,DATA_DIR+ CURRENT_TOP,creds_hmac)
+refresh_COS_data(CURRENT_NEW,DATA_DIR+ CURRENT_NEW,creds_hmac)
 
 # score_stories() takes in new "top stories" from HN, scores the stories with the model and saves a new version of json. returns a scored data df but is not used currently
-top_df = score_stories(in_path= DATA_DIR+ CURRENT_TOP, out_path = DATA_DIR+ SCORED_TOP,model_path = MODEL_PATH)
-new_df = score_stories(in_path= DATA_DIR+ CURRENT_NEW, out_path = DATA_DIR+ SCORED_NEW,model_path =  MODEL_PATH)
+top_df,topic_list = score_stories(in_path= DATA_DIR+ CURRENT_TOP, out_path = DATA_DIR+ SCORED_TOP,model_path = MODEL_PATH)
+new_df,topic_list = score_stories(in_path= DATA_DIR+ CURRENT_NEW, out_path = DATA_DIR+ SCORED_NEW,model_path =  MODEL_PATH)
 
 # prep_card_data() takes the newly scored data and prepares it to pass to our template in the code below.  returns list of json story objects
 top_list = prep_card_data( source_json = DATA_DIR+ SCORED_TOP, threshold=0.05, mode = 'cluster')
@@ -43,16 +44,16 @@ new_list = prep_card_data( source_json = DATA_DIR+ SCORED_NEW ,threshold=0.05, m
 # main landing page of flask app - we pass story_list to the template found in templates/index_template.html
 @app.route('/')
 def root():
-    return render_template('index_template.html', stories=top_list)
+    return render_template('index_template.html', stories=new_list,topics=topic_list)
 
-@app.route('/new') # still need to add
+@app.route('/top')
 def top():
-    return render_template('index_template.html', stories=story_list)
+    return render_template('index_template.html', stories=top_list,topics=topic_list)
 
 
 @app.route('/model/<model_id>')
 def modeled_cards(model_id="nmf"):
-    return render_template('model_template.html', stories=prep_card_data('data/scored_{}.json'.format(model_id),threshold= 0.05))
+    return render_template('model_template.html', stories=prep_card_data('data/scored_{}.json'.format(model_id),threshold= 0.05),model_id=model_id )
 
 @app.route('/story/<story_id>')
 def story(story_id=None):

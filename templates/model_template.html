@@ -28,30 +28,34 @@
   <div class="container-fluid">
 <div class="row-fluid" >
 <h3><a href={{ url_for('root') }}>Hacker News ML Viewer</a></h3>
+
+<h4>Topics modeled using {{ model_id|title }}</h4>
+
 </div>
 
 <div>
+
   Other topic models: <a href="{{ url_for('modeled_cards', model_id = 'nmf' )}}">NMF</a> <a href="{{ url_for('modeled_cards', model_id = 'nmf_kl' )}}">NMF KL</a> <a href="{{ url_for('modeled_cards', model_id = 'lda' )}}">LDA</a>
 </div>
-<div class="button-group filters-button-group">
+<!-- <div class="button-group filters-button-group">
   <button class="button is-checked" data-filter="*">show all</button>
-  <button class="button" data-filter=".cluster-0">topic-0</button>
-    <button class="button" data-filter=".cluster-1">topic-1</button>
-      <button class="button" data-filter=".cluster-2">topic-2</button>
-       <button class="button" data-filter=".cluster-3">topic-3</button>
-          <button class="button" data-filter=".cluster-4">topic-4</button>
-            <button class="button" data-filter=".cluster-5">topic-5</button>
-              <button class="button" data-filter=".cluster-6">topic-6</button>
-                <button class="button" data-filter=".cluster-7">topic-7</button>
-                <button class="button" data-filter=".cluster-8">topic-8</button>
-                  <button class="button" data-filter=".cluster-9">topic-9</button>
-                    <button class="button" data-filter=".cluster-10">topic-10</button>
-                      <button class="button" data-filter=".cluster-11">topic-11</button>
-                        <button class="button" data-filter=".cluster-12">topic-12</button>
-                         <button class="button" data-filter=".cluster-13">topic-13</button>
-                           <button class="button" data-filter=".cluster-14">topic-14</button>
+  <button class="button" data-filter=".Topic-0">topic-0</button>
+    <button class="button" data-filter=".Topic-1">topic-1</button>
+      <button class="button" data-filter=".Topic-2">topic-2</button>
+       <button class="button" data-filter=".Topic-3">topic-3</button>
+          <button class="button" data-filter=".Topic-4">topic-4</button>
+            <button class="button" data-filter=".Topic-5">topic-5</button>
+              <button class="button" data-filter=".Topic-6">topic-6</button>
+                <button class="button" data-filter=".Topic-7">topic-7</button>
+                <button class="button" data-filter=".Topic-8">topic-8</button>
+                  <button class="button" data-filter=".Topic-9">topic-9</button>
+                    <button class="button" data-filter=".Topic-10">topic-10</button>
+                      <button class="button" data-filter=".Topic-11">topic-11</button>
+                        <button class="button" data-filter=".Topic-12">topic-12</button>
+                         <button class="button" data-filter=".Topic-13">topic-13</button>
+                           <button class="button" data-filter=".Topic-14">topic-14</button>
 
-</div>
+</div> -->
 
 <div class='grid'>
           {% for story in stories %}
